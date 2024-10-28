@@ -130,42 +130,72 @@ while True:
         player.x += movement_speed
 
     screen.fill((0,0,0))    
-    screen.blit(current_background, (500, 25))
+    
 
     #Level navigation
-    if victory == False:
-        if current_background == bg_1 and player.x <= 500 and player.y == 480: 
+    if victory == False and dead == False:
+        screen.blit(current_background, (500, 25))
+        pygame.draw.rect(screen, blue, player)
+        #Empty Health Bar
+        pygame.draw.rect(screen, red, (50, 50, 400, 30))
+        #Full Health Bar
+        pygame.draw.rect(screen, green, (50, 50, player_health, 30))
+        if current_background == bg_1 and player.x <= 500 and player.y == 480:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("left exit")
             current_background = bg_2
             player.x = 1390
             player.y = 480
+            bullets.clear()
         if current_background == bg_2 and player.x >= 1410 and player.y == 480:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("right exit")
             current_background = bg_1
             player.x = 520
             player.x = 480
+            bullets.clear()
         if current_background == bg_1 and player.x >= 1410 and player.y == 480:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("right exit")
             current_background = bg_3
             player.x = 520
             player.y = 480
+            bullets.clear()
         if current_background == bg_3 and player.x <= 500 and player.y == 480:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("left exit")
             current_background = bg_1
             player.x = 1390
             player.y = 480
+            bullets.clear()
         if current_background == bg_1 and player.x == 962 and player.y >= 935:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("south exit")
             current_background = bg_4
             player.x = 962
             player.y = 45
+            bullets.clear()
         if current_background == bg_4 and player.x == 962 and player.y <= 25:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("north exit")
             current_background = bg_1
             player.x = 962
             player.y = 915
+            bullets.clear()
         if current_background == bg_1 and player.x == 962 and player.y <= 25:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("north exit")
             current_background = bg_5
             player.x = 962
             player.y = 915
+            bullets.clear()
         if current_background == bg_5 and player.x == 962 and player.y >= 935:
+            pygame.sprite.Group(enemy_grp).empty()
+            print("south exit")
             current_background = bg_1
             player.x = 962
             player.y = 45
+            bullets.clear()
 
     for bullet in bullets[:]:
         bullet.update()
@@ -176,13 +206,12 @@ while True:
     enemy_grp.update(player, bullets)
     enemy_grp.draw(screen)
    
-    """
+    
     #LIST CHECKING
-    print(len(bullets))
-    print(player_health)
-    print(player.y)
-    print(player.x)
-    """
+    #print(len(bullets))
+    #print(player_health)
+    #print(player.y)
+    #print(player.x)
     
     #Collision
     if player.x < 500:
@@ -197,12 +226,16 @@ while True:
     if player_health <= 0:
         dead = True
         player_health = 0
+        
+        
 
+    """
     pygame.draw.rect(screen, blue, player)
     #Empty Health Bar
     pygame.draw.rect(screen, red, (50, 50, 400, 30))
     #Full Health Bar
     pygame.draw.rect(screen, green, (50, 50, player_health, 30))
+    """
     pygame.display.flip()
        
 #Frames & Screen Updates
