@@ -1,4 +1,3 @@
-from tkinter import CURRENT
 import pygame, sys, math, random
 #Setup
 pygame.init()
@@ -32,7 +31,7 @@ class Bullet:
         self.damage = 50
         length = math.hypot(*self.dir) #Finds the hypontenuse between the location of the player and the location of the mouse click
         self.bullet = pygame.Surface((15, 15)).convert_alpha()
-        self.bullet.fill((0,255,0)) #Bullet colour
+        self.bullet.fill((0,255,0))
         if length == 0.0:
             self.dir = (0, -1)
         else:
@@ -102,21 +101,22 @@ enemy_surface = pygame.transform.scale_by(enemy_surface, 0.2)
 bullets = []
 
 enemy_grp = pygame.sprite.Group()
-pygame.time.set_timer(SPAWNENEMIES, 1000)
+pygame.time.set_timer(SPAWNENEMIES, 1000) #Spawns an enemy every second
 
 #Game Loop
+dead = False
+victory = False
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Bullet(player.x + 25, player.y + 25))
-        if event.type == SPAWNENEMIES:
-            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), enemy_surface, 2) #Spawns an enemy anywhere on the map
-            enemy_grp.add(enemy)
-
-
+    if not dead:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
+                bullets.append(Bullet(player.x + 25, player.y + 25))
+            if event.type == SPAWNENEMIES:
+                enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), enemy_surface, 2) #Spawns an enemy anywhere on the map
+                enemy_grp.add(enemy)
 
     #Player Movement
     keys = pygame.key.get_pressed()
@@ -133,23 +133,39 @@ while True:
     screen.blit(current_background, (500, 25))
 
     #Level navigation
-    if current_background == bg_1 and player.x <= 500 and player.y == 480: 
-        current_background = bg_2
-        player.x = 1390
-        player.y = 480
-    if current_background == bg_2 and player.x >= 1410 and player.y == 480:
-        current_background = bg_1
-        player.x = 520
-        player.x = 480
-    if current_background == bg_1 and player.x >= 1410 and player.y == 480:
-        current_background = bg_3
-        player.x = 520
-        player.y = 480
-    if current_background == bg_3 and player.x <= 500 and player.y == 480:
-        current_background = bg_1
-        player.x = 1390
-        player.y = 480
-    if current_background == bg_1 and 
+    if victory == False:
+        if current_background == bg_1 and player.x <= 500 and player.y == 480: 
+            current_background = bg_2
+            player.x = 1390
+            player.y = 480
+        if current_background == bg_2 and player.x >= 1410 and player.y == 480:
+            current_background = bg_1
+            player.x = 520
+            player.x = 480
+        if current_background == bg_1 and player.x >= 1410 and player.y == 480:
+            current_background = bg_3
+            player.x = 520
+            player.y = 480
+        if current_background == bg_3 and player.x <= 500 and player.y == 480:
+            current_background = bg_1
+            player.x = 1390
+            player.y = 480
+        if current_background == bg_1 and player.x == 962 and player.y >= 935:
+            current_background = bg_4
+            player.x = 962
+            player.y = 45
+        if current_background == bg_4 and player.x == 962 and player.y <= 25:
+            current_background = bg_1
+            player.x = 962
+            player.y = 915
+        if current_background == bg_1 and player.x == 962 and player.y <= 25:
+            current_background = bg_5
+            player.x = 962
+            player.y = 915
+        if current_background == bg_5 and player.x == 962 and player.y >= 935:
+            current_background = bg_1
+            player.x = 962
+            player.y = 45
 
     for bullet in bullets[:]:
         bullet.update()
@@ -159,11 +175,15 @@ while True:
 
     enemy_grp.update(player, bullets)
     enemy_grp.draw(screen)
-
-    #List Checking
-    #print(len(bullets))
-    #print(player_health)
-
+   
+    """
+    #LIST CHECKING
+    print(len(bullets))
+    print(player_health)
+    print(player.y)
+    print(player.x)
+    """
+    
     #Collision
     if player.x < 500:
         player.x = 500
@@ -174,6 +194,10 @@ while True:
     if player.y > 935:
         player.y = 935
 
+    if player_health <= 0:
+        dead = True
+        player_health = 0
+
     pygame.draw.rect(screen, blue, player)
     #Empty Health Bar
     pygame.draw.rect(screen, red, (50, 50, 400, 30))
@@ -182,4 +206,4 @@ while True:
     pygame.display.flip()
        
 #Frames & Screen Updates
-clock.tick(60)
+clock.tick(90)
