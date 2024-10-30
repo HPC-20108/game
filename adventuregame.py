@@ -193,7 +193,7 @@ while True:
     #LIST CHECKING
     #print(len(bullets))
     #print(player_health)
-    #print(player.x, player.y)
+    print(player.x, player.y)
     
     #Collision
     if player.x < 500:
