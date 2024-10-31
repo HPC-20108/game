@@ -13,6 +13,15 @@ bg_3 = pygame.image.load("room_3.png")
 bg_4 = pygame.image.load("room_4.png")
 bg_5 = pygame.image.load("Room_5.png")
 
+#Keys
+key_1 = pygame.image.load("key_1.png")
+key_2 = pygame.image.load("key_2.png")
+key_3 = pygame.image.load("key_3.png")
+
+key_1_collected = False
+key_2_collected = False
+key_3_collected = False
+
 #Player
 player = pygame.Rect(50,50,50,50)
 player.x = 960
@@ -46,15 +55,16 @@ class Bullet:
      
 #Enemy Class
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, speed, scale_factor=0.5):
+    def __init__(self, x, y, speed, scale_factor=0.1):
         super().__init__()
-        self.image = enemy_surface
+        self.image = pygame.image.load("01-01.jpg").convert_alpha()
         self.image = pygame.transform.scale_by(self.image, scale_factor)
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 1
         self.direction = pygame.math.Vector2(0, 0)
         self.health = 100
         self.damage = 0.3
+
        
     def update(self, player_rect, bullets):
         target_vector = pygame.math.Vector2(player_rect.center)
@@ -100,9 +110,6 @@ restart_text = font.render("Press Q to Restart", True, (255, 255, 255))
 #Movement
 movement_speed = 2
 
-enemy_surface = pygame.image.load("01-01.jpg").convert_alpha()
-enemy_surface = pygame.transform.scale_by(enemy_surface, 0.2)
-
 #Bullet List
 bullets = []
 
@@ -125,7 +132,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
             bullets.append(Bullet(player.x + 25, player.y + 25))
         if event.type == SPAWNENEMIES:
-            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), enemy_surface, 2) #Spawns an enemy anywhere on the map
+            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
             enemy_grp.add(enemy)
 
     #Player Movement
@@ -162,65 +169,64 @@ while True:
         enemy_grp.update(player, bullets)
         enemy_grp.draw(screen)
         if current_background == bg_1 and (player.x, player.y) == left_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_2
             player.x = 1390
             player.y = 480
         if current_background == bg_2 and (player.x, player.y) == right_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_1
             player.x = 520
             player.x = 480
         if current_background == bg_1 and (player.x, player.y) == right_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_3
             player.x = 520
             player.y = 480
         if current_background == bg_3 and (player.x, player.y) == left_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_1
             player.x = 1390
             player.y = 480
         if current_background == bg_1 and (player.x, player.y) == south_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_4
             player.x = 962
             player.y = 45
         if current_background == bg_4 and (player.x, player.y) == north_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_1
             player.x = 962
             player.y = 915
         if current_background == bg_1 and (player.x, player.y) == north_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_5
             player.x = 962
             player.y = 915
         if current_background == bg_5 and (player.x, player.y) == south_exit:
+            enemy_grp.empty()
             bullets.clear()
             current_background = bg_1
             player.x = 962
             player.y = 45
-
+    
     for bullet in bullets[:]:
         bullet.update()
         bullet.draw(screen)
         if not screen.get_rect().collidepoint(bullet.pos): #Deletes the bullet if it leaves the bounds of the screen
             bullets.remove(bullet)
-
-    #enemy_grp.update(player, bullets)
-    #enemy_grp.draw(screen)
    
     #LIST CHECKING
     #print(len(bullets))
     #print(player_health)
-    print(player.x, player.y)
-   
-    #LIST CHECKING
-    #print(len(bullets))
-    #print(player_health)
-    #print(player.y)
-    #print(player.x)
+    #print(player.x, player.y)
    
     #Collision
     if player.x < 500:
@@ -237,16 +243,7 @@ while True:
         player_health = 0
         screen.blit(death_text, (760, 40))
         screen.blit(restart_text, (625, 600))
-        
-       
 
-    """
-    pygame.draw.rect(screen, blue, player)
-    #Empty Health Bar
-    pygame.draw.rect(screen, red, (50, 50, 400, 30))
-    #Full Health Bar
-    pygame.draw.rect(screen, green, (50, 50, player_health, 30))
-    """
     pygame.display.flip()
        
 #Frames & Screen Updates
