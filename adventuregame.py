@@ -13,10 +13,19 @@ bg_3 = pygame.image.load("room_3.png")
 bg_4 = pygame.image.load("room_4.png")
 bg_5 = pygame.image.load("Room_5.png")
 
+#Keys
+key_1 = pygame.image.load("key_1.png")
+key_2 = pygame.image.load("key_2.png")
+key_3 = pygame.image.load("key_3.png")
+
+key_1_collected = False
+key_2_collected = False
+key_3_collected = False
+
 #Player
 player = pygame.Rect(50,50,50,50)
-player.x = 100
-player.y = 100
+player.x = 960
+player.y = 480
 player_health = 400
 
 current_background = bg_1
@@ -36,26 +45,27 @@ class Bullet:
             self.dir = (0, -1)
         else:
             self.dir = (self.dir[0]/length, self.dir[1]/length)
-    
+   
     def update(self):
         self.pos = (self.pos[0]+self.dir[0]*self.speed, self.pos[1]+self.dir[1]*self.speed)
 
     def draw(self, surf):
         bullet_rect = self.bullet.get_rect(center = self.pos)
         surf.blit(self.bullet, bullet_rect)
-      
+     
 #Enemy Class
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, speed, scale_factor=0.5):
+    def __init__(self, x, y, speed, scale_factor=0.1):
         super().__init__()
-        self.image = enemy_surface
+        self.image = pygame.image.load("01-01.jpg").convert_alpha()
         self.image = pygame.transform.scale_by(self.image, scale_factor)
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 1
         self.direction = pygame.math.Vector2(0, 0)
         self.health = 100
         self.damage = 0.3
-        
+
+       
     def update(self, player_rect, bullets):
         target_vector = pygame.math.Vector2(player_rect.center)
         enemy_vector = pygame.math.Vector2(self.rect.center)
@@ -76,7 +86,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.colliderect(player_rect):
             global player_health
             player_health -= self.damage
-      
+     
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
@@ -91,11 +101,14 @@ blue = (0,0,255)
 screen = pygame.display.set_mode((1920,1020))
 pygame.display.set_caption("Bullet Hell")
 
+#Font
+font = pygame.font.SysFont('Arial', 75, bold=True)
+death_text = font.render("YOU DIED", True, (255, 255, 255))
+victory_text = font.render("YOU WON", True, (255, 255, 255))
+restart_text = font.render("Press Q to Restart", True, (255, 255, 255))
+
 #Movement
 movement_speed = 2
-
-enemy_surface = pygame.image.load("01-01.jpg").convert_alpha()
-enemy_surface = pygame.transform.scale_by(enemy_surface, 0.2)
 
 #Bullet List
 bullets = []
@@ -112,16 +125,15 @@ south_exit = (962, 935)
 dead = False
 victory = False
 while True:
-    if not dead:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
-                bullets.append(Bullet(player.x + 25, player.y + 25))
-            if event.type == SPAWNENEMIES:
-                enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), enemy_surface, 2) #Spawns an enemy anywhere on the map
-                enemy_grp.add(enemy)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
+            bullets.append(Bullet(player.x + 25, player.y + 25))
+        if event.type == SPAWNENEMIES:
+            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
+            enemy_grp.add(enemy)
 
     #Player Movement
     keys = pygame.key.get_pressed()
@@ -133,67 +145,69 @@ while True:
         player.x -= movement_speed
     if keys[pygame.K_d]:
         player.x += movement_speed
+        
+    #Reset Button
+    if keys[pygame.K_q] and dead == True:
+        dead = False
+        player_health = 400
+        current_background = bg_1
+        player.x = 960
+        player.y = 480
 
     screen.fill((0,0,0))    
 
 
     #Level navigation
-    if dead == False:
-        screen.blit(current_background, (500, 25))
-        if current_background == bg_1 and (player.x, player.y) == left_exit:
-            bullets.clear()
+    if victory == False:
+        if current_background == bg_1 and player.x <= 500 and player.y == 480: 
             current_background = bg_2
             player.x = 1390
             player.y = 480
-        if current_background == bg_2 and (player.x, player.y) == right_exit:
-            bullets.clear()
+        if current_background == bg_2 and player.x >= 1410 and player.y == 480:
             current_background = bg_1
             player.x = 520
             player.x = 480
-        if current_background == bg_1 and (player.x, player.y) == right_exit:
-            bullets.clear()
+        if current_background == bg_1 and player.x >= 1410 and player.y == 480:
             current_background = bg_3
             player.x = 520
             player.y = 480
-        if current_background == bg_3 and (player.x, player.y) == left_exit:
-            bullets.clear()
+        if current_background == bg_3 and player.x <= 500 and player.y == 480:
             current_background = bg_1
             player.x = 1390
             player.y = 480
-        if current_background == bg_1 and (player.x, player.y) == south_exit:
-            bullets.clear()
+        if current_background == bg_1 and player.x == 962 and player.y >= 935:
             current_background = bg_4
             player.x = 962
             player.y = 45
-        if current_background == bg_4 and (player.x, player.y) == north_exit:
-            bullets.clear()
+        if current_background == bg_4 and player.x == 962 and player.y <= 25:
             current_background = bg_1
             player.x = 962
             player.y = 915
-        if current_background == bg_1 and (player.x, player.y) == north_exit:
-            bullets.clear()
+        if current_background == bg_1 and player.x == 962 and player.y <= 25:
             current_background = bg_5
             player.x = 962
             player.y = 915
-        if current_background == bg_5 and (player.x, player.y) == south_exit:
-            bullets.clear()
+        if current_background == bg_5 and player.x == 962 and player.y >= 935:
             current_background = bg_1
             player.x = 962
             player.y = 45
-
+    
     for bullet in bullets[:]:
         bullet.update()
         bullet.draw(screen)
         if not screen.get_rect().collidepoint(bullet.pos): #Deletes the bullet if it leaves the bounds of the screen
             bullets.remove(bullet)
 
-    #enemy_grp.update(player, bullets)
-    #enemy_grp.draw(screen)
+    enemy_grp.update(player, bullets)
+    enemy_grp.draw(screen)
    
+    """
     #LIST CHECKING
-    #print(len(bullets))
-    #print(player_health)
-    print(player.x, player.y)
+    print(len(bullets))
+    print(player_health)
+    print(player.y)
+    print(player.x)
+    """
     
     #Collision
     if player.x < 500:
@@ -208,16 +222,12 @@ while True:
     if player_health <= 0:
         dead = True
         player_health = 0
-        
-    if dead == False:
-        pygame.draw.rect(screen, blue, player)
-        #Empty Health Bar
-        pygame.draw.rect(screen, red, (50, 50, 400, 30))
-        #Full Health Bar
-        pygame.draw.rect(screen, green, (50, 50, player_health, 30))
-        enemy_grp.update(player, bullets)
-        enemy_grp.draw(screen)
-        
+
+    pygame.draw.rect(screen, blue, player)
+    #Empty Health Bar
+    pygame.draw.rect(screen, red, (50, 50, 400, 30))
+    #Full Health Bar
+    pygame.draw.rect(screen, green, (50, 50, player_health, 30))
     pygame.display.flip()
        
 #Frames & Screen Updates
