@@ -116,11 +116,15 @@ red = (255,0,0)
 green = (0,255,0)
 blue = (0,0,255)
 
-#Font
+#Display
+screen = pygame.display.set_mode((1920,1020))
+pygame.display.set_caption("Bullet Hell")
+
+#Text
 font = pygame.font.SysFont('Arial', 75, bold=True)
 death_text = font.render("YOU DIED", True, (255, 255, 255))
 victory_text = font.render("YOU WON", True, (255, 255, 255))
-restart_text = font.render("Press Q to Restart", True, (255, 255, 255))
+restart_text = font.render("Will You Try Again? Press Q", True, (255, 255, 255))
 
 #Movement
 movement_speed = 2
@@ -151,9 +155,9 @@ while True:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
             bullets.append(Bullet(player.x + 25, player.y + 25))
-        if event.type == SPAWNENEMIES:
-            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
-            enemy_grp.add(enemy)
+       # if event.type == SPAWNENEMIES:
+        #    enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
+         #   enemy_grp.add(enemy)
 
     #Key Collection
     key_items.update(player)
@@ -250,7 +254,8 @@ while True:
     #LIST CHECKING
     #print(len(bullets))
     #print(player_health)
-    print(player.x, player.y)
+    #print(player.x, player.y)
+    print(current_background)        
    
     #Collision
     if player.x < 500:
