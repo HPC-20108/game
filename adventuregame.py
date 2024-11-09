@@ -17,10 +17,6 @@ bg_3 = pygame.image.load("room_3.png")
 bg_4 = pygame.image.load("room_4.png")
 bg_5 = pygame.image.load("Room_5.png")
 
-key_1_collected = False
-key_2_collected = False
-key_3_collected = False
-
 #Player
 player = pygame.Rect(50,50,50,50)
 player.x = 960
@@ -28,6 +24,8 @@ player.y = 480
 player_health = 400
 
 current_background = bg_1
+
+keys_collected = False
 
 #Bullet Class
 class Bullet:
@@ -44,7 +42,7 @@ class Bullet:
             self.dir = (0, -1)
         else:
             self.dir = (self.dir[0]/length, self.dir[1]/length)
-   
+
     def update(self):
         self.pos = (self.pos[0]+self.dir[0]*self.speed, self.pos[1]+self.dir[1]*self.speed)
 
@@ -64,7 +62,6 @@ class Enemy(pygame.sprite.Sprite):
         self.health = 100
         self.damage = 0.3
 
-       
     def update(self, player_rect, bullets):
         target_vector = pygame.math.Vector2(player_rect.center)
         enemy_vector = pygame.math.Vector2(self.rect.center)
@@ -85,10 +82,11 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.colliderect(player_rect):
             global player_health
             player_health -= self.damage
-     
+
     def draw(self, screen):
         screen.blit(self.image, self.rect)
         
+#Key Class
 class KeyItem(pygame.sprite.Sprite):
     def __init__(self, image_path, x, y, background):
         super().__init__()
@@ -155,9 +153,9 @@ while True:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
             bullets.append(Bullet(player.x + 25, player.y + 25))
-       # if event.type == SPAWNENEMIES:
-        #    enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
-         #   enemy_grp.add(enemy)
+        if event.type == SPAWNENEMIES:
+            enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
+            enemy_grp.add(enemy)
 
     #Key Collection
     key_items.update(player)
@@ -177,17 +175,21 @@ while True:
         player.x += movement_speed
         
     #Reset Button
-    if keys[pygame.K_q] and dead == True or victory == True:
+    if keys[pygame.K_q] and (dead or victory):
         dead = False
+        victory = False
         player_health = 400
         current_background = bg_1
         player.x = 960
         player.y = 480
+        key_1.collected = False
+        key_2.collected = False
+        key_3.collected = False
 
     screen.fill((0,0,0))    
 
     #Level navigation
-    if dead == False:
+    if dead == False and victory == False:
         screen.blit(current_background, (500, 25))
         pygame.draw.rect(screen, blue, player)
         #Empty Health Bar
@@ -244,6 +246,10 @@ while True:
             current_background = bg_1
             player.x = 962
             player.y = 45
+        if current_background == bg_5 and (player.x, player.y) == north_exit and keys_collected == True:
+            enemy_grp.empty()
+            bullets.clear()
+            victory = True
     
     for bullet in bullets[:]:
         bullet.update()
@@ -255,9 +261,9 @@ while True:
     #print(len(bullets))
     #print(player_health)
     #print(player.x, player.y)
-    print(current_background)        
+    #print(current_background)        
    
-    #Collision
+    #Player Collision
     if player.x < 500:
         player.x = 500
     if player.y < 25:
@@ -267,6 +273,13 @@ while True:
     if player.y > 935:
         player.y = 935
 
+    #Victory Feature
+    if victory == True:
+        screen.blit(victory_text, (760, 40))
+        screen.blit(restart_text, (625, 600))
+        enemy_grp.empty()
+        
+    #Checking if the player is dead and resets the player's inventory
     if player_health <= 0:
         dead = True
         player_health = 0
@@ -289,12 +302,15 @@ while True:
         screen.blit(key_2.image, (190, 450))
     if key_3.collected:
         screen.blit(key_3.image, (200, 650))
+        
+    if key_1.collected == True and key_2.collected == True and key_3.collected == True:
+        keys_collected = True
 
-    if current_background == bg_2 and dead == False:
+    if current_background == bg_2 and dead == False and victory == False:
         key_1.draw(screen)
-    if current_background == bg_3 and dead == False:
+    if current_background == bg_3 and dead == False and victory == False:
         key_2.draw(screen)
-    if current_background == bg_4 and dead == False:
+    if current_background == bg_4 and dead == False and victory == False:
         key_3.draw(screen)
         
     pygame.display.flip()
