@@ -268,6 +268,9 @@ while True:
         screen.blit(death_text, (760, 40))
         screen.blit(restart_text, (625, 600))
         enemy_grp.empty()
+        key_1.collected = False
+        key_2.collected = False
+        key_3.collected = False
     
     #Key Display/Inventory
     key_display = pygame.Rect(50, 100, 350, 750)
@@ -282,11 +285,11 @@ while True:
     if key_3.collected:
         screen.blit(key_3.image, (200, 650))
 
-    if current_background == bg_2:
+    if current_background == bg_2 and dead == False:
         key_1.draw(screen)
-    if current_background == bg_3:
+    if current_background == bg_3 and dead == False:
         key_2.draw(screen)
-    if current_background == bg_4:
+    if current_background == bg_4 and dead == False:
         key_3.draw(screen)
         
     pygame.display.flip()
