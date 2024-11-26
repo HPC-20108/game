@@ -27,6 +27,9 @@ current_background = bg_1
 
 keys_collected = False
 
+flash_timer = 0
+flash_duration = 5
+
 #Bullet Class
 class Bullet:
     def __init__(self, x, y):
@@ -154,6 +157,7 @@ while True:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN: #Spawns a bullet on the player's position when the mouse is clicked
             bullets.append(Bullet(player.x + 25, player.y + 25))
+            flash_timer = flash_duration
         if event.type == SPAWNENEMIES:
             enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
             enemy_grp.add(enemy)
@@ -192,7 +196,12 @@ while True:
     #Level navigation
     if dead == False and victory == False:
         screen.blit(current_background, (500, 25))
-        pygame.draw.rect(screen, blue, player)
+        if flash_timer > 0:
+            flash_rect = player.copy()
+            pygame.draw.rect(screen, green, flash_rect)
+            flash_timer -= 1
+        else:
+            pygame.draw.rect(screen, blue, player)
         #Empty Health Bar
         pygame.draw.rect(screen, red, (50, 50, 400, 30))
         #Full Health Bar
