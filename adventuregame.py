@@ -44,7 +44,7 @@ class Bullet:
             self.dir = (self.dir[0]/length, self.dir[1]/length)
 
     def update(self):
-        self.pos = (self.pos[0]+self.dir[0]*self.speed, self.pos[1]+self.dir[1]*self.speed)
+        self.pos = (self.pos[0]+self.dir[0]*self.speed, self.pos[1]+self.dir[1]*self.speed) #Updates the position of the bullet using the direction is was fired in and setting the speed
 
     def draw(self, surf):
         bullet_rect = self.bullet.get_rect(center = self.pos)
@@ -52,28 +52,28 @@ class Bullet:
      
 #Enemy Class
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, scale_factor=0.1):
+    def __init__(self, x, y, speed, scale_factor=0.15):
         super().__init__()
-        self.image = pygame.image.load("01-01.jpg").convert_alpha()
-        self.image = pygame.transform.scale_by(self.image, scale_factor)
+        self.image = pygame.image.load("enemy.png").convert_alpha()
+        self.image = pygame.transform.scale_by(self.image, scale_factor) #Scaling the enemy image down to an appropriate size
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 1
+        self.speed = 1.8
         self.direction = pygame.math.Vector2(0, 0)
         self.health = 100
-        self.damage = 0.3
+        self.damage = 0.5
 
     def update(self, player_rect, bullets):
         target_vector = pygame.math.Vector2(player_rect.center)
         enemy_vector = pygame.math.Vector2(self.rect.center)
         direction = target_vector - enemy_vector
         if direction.magnitude() > 0:
-            self.direction = direction.normalize()
+            self.direction = direction.normalize() #Normalising the vector to make the enemy speed consistent
         #Enemy Movement & Speed
         self.rect.x += self.direction.x * self.speed
         self.rect.y += self.direction.y * self.speed
         #Checking for bullet collisions
         for bullet in bullets[:]:
-            if self.rect.collidepoint(bullet.pos):
+            if self.rect.collidepoint(bullet.pos): #Checking if a bullet from the bullet list collides with an enemy
                 self.health -= bullet.damage
                 bullets.remove(bullet)
                 if self.health <= 0:
@@ -96,16 +96,17 @@ class KeyItem(pygame.sprite.Sprite):
         self.collected = False
         
     def update(self, player_rect):
-        if self.rect.colliderect(player_rect) and self.collected == False and current_background == self.background:
+        if self.rect.colliderect(player_rect) and self.collected == False and current_background == self.background: #Checks if the key is already collected and if the player is in the correct room
             self.collected = True
             
     def draw(self, screen):
         if not self.collected:
             screen.blit(self.image, self.rect)
 
-key_1 = KeyItem("key_1.png", 960, 480, bg_2)
-key_2 = KeyItem("key_2.png", 960, 480, bg_3)
-key_3 = KeyItem("key_3.png", 960, 480, bg_4)
+#Key Collectables
+key_1 = KeyItem("key_1.png", 640, 250, bg_2)
+key_2 = KeyItem("key_2.png", 1206, 450, bg_3)
+key_3 = KeyItem("key_3.png", 560, 780, bg_4)
 
 #Colours
 black = (0,0,0)
@@ -157,7 +158,7 @@ while True:
             enemy = Enemy(random.randrange(500,1410),random.randrange(25,935), 2) #Spawns an enemy anywhere on the map
             enemy_grp.add(enemy)
 
-    #Key Collection
+    #Making keys visible and interactable in their corresponding backgrounds
     key_items.update(player)
     for KeyItem in key_items:
         if current_background == KeyItem.background:
@@ -174,7 +175,7 @@ while True:
     if keys[pygame.K_d]:
         player.x += movement_speed
         
-    #Reset Button
+    #Reset button that resets key collectables, player position and player health
     if keys[pygame.K_q] and (dead or victory):
         dead = False
         victory = False
@@ -250,18 +251,12 @@ while True:
             enemy_grp.empty()
             bullets.clear()
             victory = True
-    
+
     for bullet in bullets[:]:
         bullet.update()
         bullet.draw(screen)
         if not screen.get_rect().collidepoint(bullet.pos): #Deletes the bullet if it leaves the bounds of the screen
             bullets.remove(bullet)
-   
-    #LIST CHECKING
-    #print(len(bullets))
-    #print(player_health)
-    #print(player.x, player.y)
-    #print(current_background)        
    
     #Player Collision
     if player.x < 500:
@@ -312,7 +307,7 @@ while True:
         key_2.draw(screen)
     if current_background == bg_4 and dead == False and victory == False:
         key_3.draw(screen)
-        
+
     pygame.display.flip()
        
 #Frames & Screen Updates
